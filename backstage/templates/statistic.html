@@ -1,0 +1,194 @@
+{% extends "backstage.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block title %}Patent Office: 統計數據{% endblock title %}
+
+{% block content %}
+
+<br>
+<h1 class="page-title">統計數據</h1>
+
+<div class="page-container">
+    <div class="search-section">
+        <select id="role-select">
+            <option value="">請選擇統計類型</option>
+            <option value="yearlyData">委託年度－數量</option>
+            <option value="typeData">專利案類型－數量</option>
+        </select>
+        <button class="btn" onclick="filterTable()">查詢</button>
+    </div>
+</div>
+<br>
+
+<!-- 委託年度/數量 -->
+<div class="container">
+    <div id="yearlyData-chart" class="chart-container"></div>
+</div>
+
+<div id="yearlyData-graph" class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>年度</th>
+                <th>數量</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<br>
+
+<!-- 專利案類型/數量 -->
+<div class="container">
+    <div id="typeData-chart" class="chart-container"></div>
+</div>
+
+<div id="typeData-graph" class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>專利案類型</th>
+                <th>數量</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<br>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script>
+    function filterTable() {
+        // 隱藏所有表格
+        document.querySelectorAll('.table-container').forEach(table => {
+            table.classList.remove('visible');
+        });
+
+        // 隱藏所有圖表
+        document.querySelectorAll('.chart-container').forEach(chart => {
+            chart.style.display = 'none';
+        });
+
+        // 獲取選擇的類型
+        const selectedType = document.getElementById('role-select').value;
+
+        if (selectedType) {
+            // 向後端發送查詢請求
+            fetch('/backstage/get_statistic', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ type: selectedType }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    
+                    // 顯示對應圖表
+                    if (selectedType === 'yearlyData') {
+                        renderYearlyChart(data.data);
+                    } 
+                    else if (selectedType === 'typeData') {
+                        renderTypeChart(data.data);
+                    }
+
+                    // 更新表格
+                    updateTable(selectedType, data.data);
+                } 
+                else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function updateTable(type, data) {
+        let tableId = '';
+        let tableBody = '';
+
+        if (type === 'yearlyData') {
+            tableId = 'yearlyData-graph';
+            tableBody = data.map(i => 
+                `<tr>
+                    <td>${i['委託年度']}</td>
+                    <td>${i['數量']}</td>
+                </tr>
+            `).join('');
+        } 
+        else if (type === 'typeData') {
+            tableId = 'typeData-graph';
+            tableBody = data.map(i => 
+                `<tr>
+                    <td>${i['專利案類型']}</td>
+                    <td>${i['數量']}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 更新表格內容
+        const tableElement = document.getElementById(tableId);
+        tableElement.querySelector('tbody').innerHTML = tableBody;
+        tableElement.classList.add('visible');
+    }
+
+    function renderYearlyChart(data) {
+        const chartContainer = document.getElementById('yearlyData-chart');
+        chartContainer.style.display = 'block';
+
+        const chart = echarts.init(chartContainer);
+        const option = {
+            title: { text: '各年度專利案委託數量', left: 'center' },
+            tooltip: {},
+            xAxis: {
+                type: 'category',
+                data: data.map(item => item['委託年度']),
+            },
+            yAxis: { type: 'value' },
+            series: [{
+                data: data.map(item => item['數量']),
+                type: 'bar',
+                label: { show: true, position: 'top' },
+            }],
+        };
+        chart.setOption(option);
+    }
+
+    function renderTypeChart(data) {
+        const chartContainer = document.getElementById('typeData-chart');
+        chartContainer.style.display = 'block';
+
+        const chart = echarts.init(chartContainer);
+        const option = {
+            title: { text: '各專利案類型總數量', left: 'center' },
+            tooltip: { trigger: 'item' },
+            legend: { 
+                orient: 'vertical',
+                left: 'center',
+                bottom: 'bottom',
+                itemWidth: 40,
+                itemHeight: 20,
+                data: data.map(item => item['專利案類型']),
+            },
+            series: [{
+                type: 'pie',
+                radius: '50%',
+                data: data.map(item => ({ value: item['數量'], name: item['專利案類型'] })),
+                label: { formatter: '{b}: {c} ({d}%)' },
+            }],
+        };
+        chart.setOption(option);
+    }
+
+</script>
+
+{% endblock content %}

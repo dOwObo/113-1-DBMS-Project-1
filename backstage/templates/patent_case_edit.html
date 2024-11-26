@@ -1,0 +1,81 @@
+{% extends "backstage.html" %}
+
+{% block head %}
+  {{ super() }}
+{% endblock head %}
+
+{% block title %}Patent Office: 專利案管理{% endblock title %}
+
+{% block content %}
+
+<br>
+<h1 class="page-title">修改專利案資訊</h1>
+
+<form method="POST" enctype=multipart/form-data action={{ url_for('manager.patent_case_edit', pId=data['案件編號']) }}>
+  <table>
+    <tr>
+      <th>案件編號</th>
+      <td><input class="form-control" type="number" value="{{ data.案件編號 }}" name="pId" readonly></td>
+    </tr>
+    <tr>
+      <th>客戶編號</th>
+      <td><input class="form-control" type="number" value="{{ data.客戶編號 }}" name="cId" required></td>
+    </tr>
+    <tr>
+      <th>委託日</th>
+      <td><input class="form-control" type="date" value="{{ data.委託日 }}" name="commissionDate" required></td>
+    </tr>
+    <tr>
+      <th>專利名稱</th>
+      <td><input class="form-control" type="text" value="{{ data.專利名稱 }}" name="pName" required></td>
+    </tr>
+    <tr>
+      <th>專利類型</th>
+      <td>
+        <select class="form-control" value="{{ data.專利類型 }}" name="pType" required>
+          <option value="發明">發明</option>
+          <option value="新型">新型</option>
+          <option value="設計">設計</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <th>專利權人</th>
+      <td><input class="form-control" type="text" value="{{ data.專利權人 }}" name="patentee" required></td>
+    </tr>
+    <tr>
+      <th>發明人</th>
+      <td><input class="form-control" type="text" value="{{ data.發明人 }}" name="inventor" required></td>
+    </tr>
+    <tr>
+      <th>工程師編號</th>
+      <td><input class="form-control" type="number" value="{{ data.工程師編號 }}" name="eId"></td>
+    </tr>
+    <tr>
+      <th>申請號</th>
+      <td><input class="form-control" type="text" value="{{ data.申請號 }}" name="aId"></td>
+    </tr>
+    <tr>
+      <th>申請日</th>
+      <td><input class="form-control" type="date" value="{{ data.申請日 }}" name="applicationDate"></td>
+    </tr>
+    <tr>
+      <th>證書號</th>
+      <td><input class="form-control" type="text" value="{{ data.證書號 }}" name="certificateId"></td>
+    </tr>
+    <tr>
+      <th>專利權開始</th>
+      <td><input class="form-control" type="date" value="{{ data.專利權開始 }}" name="startDate"></td>
+    </tr>
+    <tr>
+      <th>專利權結束</th>
+      <td><input class="form-control" type="date" value="{{ data.專利權結束 }}" name="endDate"></td>
+    </tr>
+  </table>
+  <div class="edit-btn">
+    <button class="btn btn-danger" onclick="history.back()">返回</button>
+    <button class="btn btn-success" type="submit">修改</button> 
+  </div>
+</form>
+
+{% endblock %}

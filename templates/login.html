@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block title %}Patent Office: Login{% endblock title %}
+
+{% block content%}
+<div class="position-absolute top-50 start-50 translate-middle outer_div ">
+    <img class="icon" src="{{ url_for('static', filename='./img/patented_logo.png') }}">
+    <h1 class="login_title mb-4 mt-4">專利事務管理系統</h1>
+    <div class="form_div">
+        <form  method='post' action={{ url_for('api.login') }} >
+            <p class="mb-4">
+                帳號：<input type="text" name="account" required/>
+            </p>
+            <p class="mb-4">
+                密碼：<input type="password" name="password" required/>
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                
+                <p class="same_accoount">
+                    {% for i in messages %}
+                        {{ i }}
+                    {% endfor %}
+                </p>
+                {% endif %}
+                {% endwith %}
+            </p>
+            <p class="mb-4">
+                <button type="reset" class="btn">清除</button>
+                <button type="submit" class="btn">登入</button>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock content %}

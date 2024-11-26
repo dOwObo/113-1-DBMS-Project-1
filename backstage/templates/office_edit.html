@@ -1,0 +1,43 @@
+{% extends "backstage.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block title %}Patent Office: 分部管理{% endblock title %}
+
+{% block content %}
+
+<br>
+<h1 class="page-title">修改分部資訊</h1>
+
+<form method="POST" enctype=multipart/form-data action={{ url_for('manager.office_edit', officeName=data['分部名稱']) }}>
+    <table>
+        <tr>
+            <th>分部名稱</th>
+            <td><input class="form-control" type="text" value="{{ data.分部名稱 }}" name="officeName" readonly class="id_input"></td>
+        </tr>
+        <tr>
+            <th>聯絡人</th>
+            <td><input class="form-control" type="text" value="{{ data.聯絡人 }}" name="contactPerson"></td>
+        </tr>
+        <tr>
+            <th>聯絡電話</th>
+            <td><input class="form-control" type="text" value="{{ data.聯絡電話 }}" name="phone"></td>
+        </tr>
+        <tr>
+            <th>電子郵件</th>
+            <td><input class="form-control" type="text" value="{{ data.電子郵件 }}" name="email"></td>
+        </tr>
+        <tr>
+            <th>地址</th>
+            <td><input class="form-control" type="text" value="{{ data.地址 }}" name="address"></td>
+        </tr>
+    </table>
+    <div class="edit-btn">
+        <a href="{{ url_for('manager.office') }}"><button class="btn btn-danger">返回</button></a>
+        <button class="btn btn-success" type="submit">修改</button> 
+    </div>
+</form>
+
+{% endblock content %}

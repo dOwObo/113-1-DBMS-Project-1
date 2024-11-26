@@ -1,0 +1,146 @@
+{% extends "backstage.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block title %}Patent Office: 專利案管理{% endblock title %}
+
+{% block content %}
+
+<!-- 查詢錯誤 -->
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% if messages[0] == 'N/A' %}
+            <script language="javascript">
+                alert('Data not found!');
+            </script>
+        {% endif %}
+    {% endif %}
+{% endwith %}
+
+<br>
+<h1 class="page-title">專利案管理</h1>
+
+<div class="page-container">
+    <div style="width: 70px;"></div>
+    <div style="width: 70px;"></div>
+    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#patentModalBackdrop">
+        新增
+    </button>
+</div>
+
+ <!-- 新增專利案 -->
+ <form method="post" enctype=multipart/form-data action="{{ url_for('manager.patent_case_add') }}">
+    <div class="modal fade" id="patentModalBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="patentModalBackdrop">新增專利案</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="inputCustomerId" class="form-label">客戶編號</label>
+                        <input type="number" class="form-control" id="inputCustomerId" name="cId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputCommissionDate" class="form-label">案件委託日</label>
+                        <input type="date" class="form-control" id="inputCommissionDate" name="commissionDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputPatentName" class="form-label">專利名稱</label>
+                        <input type="text" class="form-control" id="inputPatentName" name="pName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputPatentType" class="form-label">專利類型</label>
+                        <select id="inputPatentType" class="form-select" name="pType" required>
+                            <option selected disabled value="">請選擇類型</option>
+                            <option value="發明">發明</option>
+                            <option value="新型">新型</option>
+                            <option value="設計">設計</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputPatentee" class="form-label">專利權人</label>
+                        <input type="text" class="form-control" id="inputPatentee" name="patentee" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputInventor" class="form-label">發明人</label>
+                        <input type="text" class="form-control" id="inputInventor" name="inventor" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputEngineerId" class="form-label">負責工程師編號</label>
+                        <input type="number" class="form-control" id="inputEngineerId" name="eId">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputApplicationId" class="form-label">申請號</label>
+                        <input type="text" class="form-control" id="inputApplicationId" name="aId">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputApplicationDate" class="form-label">申請日</label>
+                        <input type="date" class="form-control" id="inputApplicationDate" name="applicationDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputCertificateId" class="form-label">證書號</label>
+                        <input type="text" class="form-control" id="inputCertificateId" name="certificateId">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputStartDate" class="form-label">專利權開始日</label>
+                        <input type="date" class="form-control" id="inputStartDate" name="startDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputEndDate" class="form-label">專利權結束日</label>
+                        <input type="date" class="form-control" id="inputEndDate" name="endDate">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-success">新增</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- 查詢結果 -->
+<form method="POST" action="{{ url_for('manager.patent_case_manager') }}">
+    <table>
+        <!-- 欄位名稱 -->
+        <thead>
+            <tr>
+                <th>案件編號</th>
+                <th>客戶名稱</th>
+                <th>委託日</th>
+                <th>專利名稱</th>
+                <th>專利類型</th>
+                <th>專利權人</th>
+                <th>案件狀態</th>
+                <th>負責工程師</th>
+                <th colspan="2" width="18%">操作</th>
+            </tr>
+        </thead>
+
+        <!-- 欄位值 -->
+        <tbody>
+            {% for i in data %}
+            <tr>
+                <td>{{ i.案件編號 }}</td>
+                <td>{{ i.客戶名稱 }}</td>
+                <td>{{ i.委託日 }}</td>
+                <td>{{ i.專利名稱 }}</td>
+                <td>{{ i.專利類型 }}</td>
+                <td>{{ i.專利權人 }}</td>
+                <td>{{ i.案件狀態 }}</td>
+                <td>{{ i.負責工程師 }}</td>
+                <td><button class="btn btn-edit" type="submit" value="{{ i.案件編號 }}" name="edit">修改</button></td>
+                <td><button class="btn btn-delete" type="submit" 
+                    value="{{ i.案件編號 }}" name="delete" 
+                    onclick="return (confirm('確定要刪除嗎？ ∑\(✘Д✘๑ \)\n\n案件編號：{{ i.案件編號 }}\n客戶名稱：{{ i.客戶名稱 }}\n專利名稱：{{ i.專利名稱 }}\n案件狀態：{{ i.案件狀態 }}'))">刪除</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+
+{% endblock content %}

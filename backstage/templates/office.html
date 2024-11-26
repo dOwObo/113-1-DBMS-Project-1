@@ -1,0 +1,145 @@
+{% extends "backstage.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block title %}Patent Office: 分部管理{% endblock title%}
+
+{% block content%}
+
+<!-- 查詢錯誤 -->
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% if messages[0] == 'N/A' %}
+            <script language="javascript">
+                alert('Data not found!');
+            </script>
+        {% endif %}
+    {% endif %}
+{% endwith %}
+
+<!-- 刪除錯誤 -->
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% if messages[0] == 'failed' %}
+            <script language="javascript">
+                alert('Deletion is not allowed!');
+            </script>
+        {% endif %}
+    {% endif %}
+{% endwith %}
+
+<br>
+<h1 class="page-title">分部管理</h1>
+
+<div class="page-container">
+    <div style="width: 70px;"></div>
+    <form class="search-section" method="POST" action="{{ url_for('manager.office') }}">
+        <input type="text" name="officeName" placeholder="輸入分部名稱">
+        <button class="btn" type="submit" name="select">查詢</button>
+    </form>
+    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#officeModalBackdrop">
+        新增
+    </button>
+</div>
+
+<!-- 新增分部 -->
+<form method="post" enctype="multipart/form-data" action="{{ url_for('manager.office_add') }}">
+    <div class="modal fade" id="officeModalBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addBranchModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="officeModalBackdrop">新增事務所分部</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="inputOfficeName" class="form-label">分部名稱</label>
+                        <input type="text" class="form-control" id="inputOfficeName" name="officeName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputContactPerson" class="form-label">聯絡人</label>
+                        <input type="text" class="form-control" id="inputContactPerson" name="contactPerson">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputPhone" class="form-label">聯絡電話</label>
+                        <input type="text" class="form-control" id="inputPhone" name="phone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputEmail" class="form-label">電子郵件</label>
+                        <input type="email" class="form-control" id="inputEmail" name="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputAddress" class="form-label">地址</label>
+                        <input type="text" class="form-control" id="inputAddress" name="address">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-success">新增</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- 查詢結果 -->
+<form method="POST" action="{{ url_for('manager.office_manager') }}">
+    <table>
+        <!-- 欄位名稱 -->
+        <thead>
+            <tr>
+                <th>分部名稱</th>
+                <th>聯絡人</th>
+                <th>聯絡電話</th>
+                <th>電子郵件</th>
+                <th>地址</th>
+                <th colspan="2" width="18%">操作</th>
+            </tr>
+        </thead>
+
+        <!-- 欄位值 -->
+        <tbody>
+            {% for i in data %}
+            <tr>
+                <td>{{ i.分部名稱 }}</td>
+                <td>{{ i.聯絡人 }}</td>
+                <td>{{ i.聯絡電話 }}</td>
+                <td>{{ i.電子郵件 }}</td>
+                <td>{{ i.地址 }}</td>
+                <td><button class="btn btn-edit" type="submit" value="{{ i.分部名稱 }}" name="edit">修改</button></td>
+                <td><button class="btn btn-delete" type="submit" 
+                    value="{{ i.分部名稱 }}" name="delete" 
+                    onclick="return (confirm('確定要刪除嗎？ ∑\(✘Д✘๑ \)\n\n分部名稱：{{ i.分部名稱 }}\n聯絡人：{{ i.聯絡人 }}\n地址：{{ i.地址 }}'))">刪除</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editButtons = document.querySelectorAll('.btn-edit');
+
+        editButtons.forEach(button => {
+            button.addEventListener('click', () => {
+
+                const officeName = button.getAttribute('data-office-name');
+                const contactPerson = button.getAttribute('data-contact-person');
+                const phone = button.getAttribute('data-phone');
+                const email = button.getAttribute('data-email');
+                const address = button.getAttribute('data-address');
+                
+                document.getElementById('editOfficeNameHidden').value = officeName;
+                document.getElementById('inputOfficeName').value = officeName;
+                document.getElementById('inputContactPerson').value = contactPerson;
+                document.getElementById('inputPhone').value = phone;
+                document.getElementById('inputEmail').value = email;
+                document.getElementById('inputAddress').value = address;
+            });
+        });
+    });
+</script>
+
+{% endblock content %}

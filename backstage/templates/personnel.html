@@ -1,0 +1,163 @@
+{% extends "backstage.html" %}
+
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block title %}Patent Office: 人員管理{% endblock title %}
+
+{% block content %}
+
+<br>
+<h1 class="page-title">人員管理</h1>
+
+<div class="page-container">
+    <div class="search-section">
+        <select id="role-select">
+            <option value="">請選擇人員類型</option>
+            <option value="engineer">工程師</option>
+            <option value="customerservice">客服</option>
+            <option value="client">客戶</option>
+        </select>
+        <button class="btn" onclick="filterTable()">查詢</button>
+    </div>
+</div>
+
+
+<!-- 工程師表格 -->
+<div id="engineer-table" class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>工程師編號</th>
+                <th>姓名</th>
+                <th>聯絡電話</th>
+                <th>專業領域</th>
+                <th>公司分部</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- 客服表格 -->
+<div id="customerservice-table" class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>客服編號</th>
+                <th>姓名</th>
+                <th>聯絡電話</th>
+                <th>電子郵件</th>
+                <th>公司分部</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- 客戶表格 -->
+<div id="client-table" class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>客戶編號</th>
+                <th>客戶名稱</th>
+                <th>聯絡電話</th>
+                <th>電子郵件</th>
+                <th>地址</th>
+                <th>責任客服</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    function filterTable() {
+        // 隱藏所有表格
+        document.querySelectorAll('.table-container').forEach(table => {
+            table.classList.remove('visible');
+        });
+
+        // 獲取選擇的類型
+        const selectedType = document.getElementById('role-select').value;
+
+        if (selectedType) {
+            // 向後端發送查詢請求
+            fetch('/backstage/get_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ type: selectedType }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    updateTable(selectedType, data.data);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function updateTable(type, data) {
+        let tableId = '';
+        let tableBody = '';
+
+        if (type === 'engineer') {
+            tableId = 'engineer-table';
+            tableBody = data.map(i => 
+                `<tr>
+                    <td>${i['工程師編號']}</td>
+                    <td>${i['姓名']}</td>
+                    <td>${i['聯絡電話']}</td>
+                    <td>${i['專業領域']}</td>
+                    <td>${i['公司分部']}</td>
+                </tr>`
+            ).join('');
+        } 
+        
+        else if (type === 'customerservice') {
+            tableId = 'customerservice-table';
+            tableBody = data.map(i => 
+                `<tr>
+                    <td>${i['客服編號']}</td>
+                    <td>${i['姓名']}</td>
+                    <td>${i['聯絡電話']}</td>
+                    <td>${i['電子郵件']}</td>
+                    <td>${i['公司分部']}</td>
+                </tr>`
+            ).join('');
+        } 
+        
+        else if (type === 'client') {
+            tableId = 'client-table';
+            tableBody = data.map(i => 
+                `<tr>
+                    <td>${i['客戶編號']}</td>
+                    <td>${i['客戶名稱']}</td>
+                    <td>${i['聯絡電話']}</td>
+                    <td>${i['電子郵件']}</td>
+                    <td>${i['地址']}</td>
+                    <td>${i['責任客服']}</td>
+                </tr>`
+            ).join('');
+        }
+
+        // 更新表格內容
+        const tableElement = document.getElementById(tableId);
+        tableElement.querySelector('tbody').innerHTML = tableBody;
+        tableElement.classList.add('visible');
+    }
+</script>
+
+{% endblock content %}
